@@ -156,6 +156,10 @@ try:
                     "exec_master_log_pos(" + str(exec_master_log_pos) + ") is behind read_master_log_pos(" + str(
                         read_master_log_pos) + "), wait 2s to continue")
                 time.sleep(2)
+                cursor.execute('SHOW SLAVE STATUS;')
+                result = cursor.fetchone()
+                read_master_log_pos = result["Read_Master_Log_Pos"]
+                exec_master_log_pos = result["Exec_Master_Log_Pos"]
             else:
                 break
         logging.info("latest log position in master binlog file:" + str(
