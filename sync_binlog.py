@@ -109,6 +109,9 @@ try:
         cursor = conn.cursor(cursorclass=mdb.cursors.DictCursor)
         cursor.execute('SHOW SLAVE STATUS;')
         result = cursor.fetchone()
+        if not result:
+            logging.error("Executing 'show slave status' on mysql instance that is not a slave,exit(1) without doing anything.")
+            exit(1)
         master_host = result["Master_Host"];
         if master_host != master_ip:
             logging.info(
@@ -152,10 +155,17 @@ try:
         # this is important, as binlog needs to be applied on slave in time sequence .
         while True:
             if exec_master_log_pos != read_master_log_pos:
-                logging.info(
-                    "exec_master_log_pos(" + str(exec_master_log_pos) + ") is behind read_master_log_pos(" + str(
-                        read_master_log_pos) + "), wait 2s to continue")
+                if slave_sql_running != 'Yes':
+                    logging.error("This candidate(" + candidate_host
+                                  + ") sql thread has stoped and exec_master_log_pos("
+                                  + str(exec_master_log_pos) + ") is behind read_master_log_pos("
+                                  + str(read_master_log_pos) + "), need to be handled manully")
+                    exit(1)
+                logging.info("exec_master_log_pos(" + str(exec_master_log_pos)
+                             + ") is behind read_master_log_pos("
+                             + str(read_master_log_pos) + "), wait 2s to continue")
                 time.sleep(2)
+
                 cursor.execute('SHOW SLAVE STATUS;')
                 result = cursor.fetchone()
                 read_master_log_pos = result["Read_Master_Log_Pos"]
@@ -184,3 +194,4 @@ finally:
     conn.close()
 
 exit(0)
+
