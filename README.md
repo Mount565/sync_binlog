@@ -3,7 +3,7 @@
 
 配合mysqlfailover的--exec-before 注入脚本，同步masterbinlog到slave， 从而使slave恢复过程中binlog无缺失
 
-MHA 0.58 针对GTID复制不会再从故障master上做binlog补偿 [source](https://github.com/yoshinorim/mha4mysql-manager/blob/abe11f9abb74bc5886012ff5cc9e209fb9b093c1/lib/MHA/MasterFailover.pm#L2131) 但针对GTID auto_position复制还是有方案来避免主库上最后一个事务未被复制到从库的。  
+MHA 0.58 针对GTID复制不会再从故障master上做binlog补偿 ([source](https://github.com/yoshinorim/mha4mysql-manager/blob/abe11f9abb74bc5886012ff5cc9e209fb9b093c1/lib/MHA/MasterFailover.pm#L2131)),并且其恢复逻辑与mysqlfailover是一致的。 但针对GTID auto_position复制还是有方案来避免主库上最后一个事务未被复制到从库的。  
 
 # 方案一：
 
